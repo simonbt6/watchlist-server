@@ -38,9 +38,9 @@ module.exports = {
             db.query(`SELECT * FROM watchlist WHERE owner_id="${rs1[0].uuid} AND deleted_at IS NULL;"`, (err, rs2) => {
                 if (err) throw err;
 
-                rs1.watchlists = rs2;
+                rs1[0].watchlists = rs2;
         
-                res.send(rs1);
+                res.send({rs1});
             });
         });
     },
