@@ -35,12 +35,12 @@ module.exports = {
                 throw new Error("Too many rows to result.");
             }
 
-            db.query(`SELECT * FROM watchlist WHERE owner_id="${rs1[0].uuid} AND deleted_at IS NULL;"`, (err, rs2) => {
+            db.query(`SELECT * FROM watchlist WHERE owner_id="${rs1[0].uuid}" AND deleted_at IS NULL;`, (err, rs2) => {
                 if (err) throw err;
 
                 rs1[0].watchlists = rs2;
         
-                res.send({rs1});
+                res.send(rs1);
             });
         });
     },
