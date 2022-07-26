@@ -26,19 +26,20 @@ module.exports = {
         db.query(`SELECT * FROM user WHERE uuid="${req.params.uuid}"`, (err, rs1) => {
             if (err) throw err;
             
-            if (rs.length == 0) {
+            if (rs1.length == 0) {
                 res.send("User not found.");
                 return;
             }
     
-            if (rs.length > 1) {
+            if (rs1.length > 1) {
                 throw new Error("Too many rows to result.");
             }
 
-            db.query(`SELECT * FROM watchlist WHERE owner_id="${rs[0].uuid};"`, (err, rs2) => {
+            db.query(`SELECT * FROM watchlist WHERE owner_id="${rs[0].uuid} AND deleted_at IS NULL;"`, (err, rs2) => {
                 if (err) throw err;
+
                 rs1.watchlists = rs2;
-                
+        
                 res.send(rs1);
             });
         });
