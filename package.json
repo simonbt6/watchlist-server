@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js",
+    "prod": "forever -o output_forever.log -e error_forever.log -l forever.log start index.js",
+    "test": "node index.js",
     "live": "nodemon index.js"
   },
   "author": "Simon Brisebois-Therrien",
