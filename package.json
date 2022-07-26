@@ -4,9 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "prod": "forever start index.js",
-    "test": "node index.js",
-    "live": "nodemon index.js"
+    "prod": "sudo forever start index.js",
+    "test": "sudo node index.js",
+    "live": "sudo nodemon index.js"
   },
   "author": "Simon Brisebois-Therrien",
   "license": "ISC",
