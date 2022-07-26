@@ -1,6 +1,5 @@
 const { now } = require('../util/time');
 const Crypto = require('crypto');
-
 const db = require('../util/database');
 
 
@@ -24,7 +23,7 @@ module.exports = {
      * @param {*} res 
      */
     GetByUUID: (req, res) => {
-        db.query(`SELECT * FROM user WHERE uuid="${req.params.uuid}"`, (err, rs) => {
+        db.query(`SELECT * FROM user WHERE uuid="${req.params.uuid}"`, (err, rs1) => {
             if (err) throw err;
             
             if (rs.length == 0) {
@@ -35,8 +34,13 @@ module.exports = {
             if (rs.length > 1) {
                 throw new Error("Too many rows to result.");
             }
-            
-            res.send(rs);
+
+            db.query(`SELECT * FROM watchlist WHERE owner_id="${rs[0].uuid};"`, (err, rs2) => {
+                if (err) throw err;
+                rs1.watchlists = rs2;
+                
+                res.send(rs1);
+            });
         });
     },
 
