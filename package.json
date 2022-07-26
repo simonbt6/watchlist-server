@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "prod": "forever -o output_forever.log -e error_forever.log -l forever.log start index.js",
+    "prod": "forever start index.js",
     "test": "node index.js",
     "live": "nodemon index.js"
   },
