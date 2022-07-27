@@ -5,7 +5,7 @@ const db = require('../util/database');
 
 module.exports = {
     GetAll: (req, res) => {
-        db.query(`SELECT name, uuid, created_at, updated_at FROM user`, (err, rs) => {
+        db.query(`SELECT uuid, created_at, updated_at FROM user`, (err, rs) => {
             if (err) throw err;
             
             if (rs.length == 0) {
@@ -24,7 +24,7 @@ module.exports = {
      */
     GetByUUID: (req, res) => {
         db.query(
-            `SELECT name, uuid, created_at, updated_at, deleted_at FROM user WHERE uuid="${req.params.uuid}"`, 
+            `SELECT uuid, created_at, updated_at, deleted_at FROM user WHERE uuid="${req.params.uuid}"`, 
             (err, rs1) => {
                 if (err) throw err;
                 
@@ -50,18 +50,17 @@ module.exports = {
     },
 
     /**
-     * **Requires name param.**
      * @param {*} res 
      * @param {*} req 
      */
     Create: (req, res) => {
         let uuid = Crypto.randomUUID();
-        db.query(`INSERT INTO user (name, uuid) VALUES ('${req.params.name}', '${uuid}');`, (err, rs) => {
+        db.query(`INSERT INTO user (uuid) VALUES ('${uuid}');`, (err, rs) => {
             if (err) throw err;
 
             if (rs.affectedRows < 1) {
                 res.statusCode = 400;
-                console.error(`Failed to add user to database. username=${req.params.name}`);
+                console.error(`Failed to add user to database. uuid=${uuid}`);
                 res.send({error: "Failed to add new user to database."});
                 return;
             }
