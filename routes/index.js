@@ -80,7 +80,7 @@ module.exports = [
             'handlers': WatchlistRoute.AddItem
         },
         {
-            'path': '/watchlist/:uuid',
+            'path': '/watchlist/',
             'method': 'post',
             'middlewares': [],
             'handlers': WatchlistRoute.Create
