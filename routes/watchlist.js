@@ -72,7 +72,7 @@ module.exports = {
             res.send("Please provide a valid request body.");
             return;
         }
-        let uuid = crypto.randomUUID();
+        let uuid = Crypto.randomUUID();
         db.query(`SELECT id FROM user WHERE uuid='${req.body.owner}'`, (err, rs) => {
             if (err) throw err;
     
