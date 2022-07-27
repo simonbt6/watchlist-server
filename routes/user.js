@@ -44,7 +44,7 @@ module.exports = {
 
                         rs1[0].watchlists = rs2;
                 
-                        res.send(rs1);
+                        res.send(rs1[0]);
                 });
         });
     },
