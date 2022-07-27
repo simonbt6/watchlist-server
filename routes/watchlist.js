@@ -2,10 +2,10 @@ const { now } = require('../util/time');
 const Crypto = require('crypto');
 const db = require('../util/database');
 
-
 module.exports = {
     GetAll: (req, res) => {
-        db.query(`SELECT * FROM watchlist WHERE deleted_at IS NULL;`, (err, rs) => {
+        db.query(`SELECT * FROM watchlist WHERE deleted_at IS NULL;`, 
+        (err, rs) => {
             if (err) throw err;
     
             if (rs.length < 1) {
@@ -31,7 +31,7 @@ module.exports = {
                 }
 
                 db.query(
-                    `SELECT name, uuid, url, created_at, updated_at FROM watchlist_item WHERE watchlist_id='${req.params.uuid}' AND deleted_at IS NULL`, 
+                    `SELECT name, uuid, url, created_at, updated_at FROM watchlist_item WHERE watchlist_id='${req.params.uuid}' AND deleted_at IS NULL;`, 
                     (err, rs2) => {
                         if (err) throw err;
 
@@ -122,6 +122,7 @@ module.exports = {
     },
 
     /**
+     * ``user_id`` header **required**
      * @param {*} uuid 
      */
     Delete: (req, res) => {
