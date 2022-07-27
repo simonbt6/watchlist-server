@@ -24,7 +24,7 @@ module.exports = {
      */
     GetByUUID: (req, res) => {
         db.query(
-            `SELECT name, uuid, created_at, updated_at FROM user WHERE uuid="${req.params.uuid}"`, 
+            `SELECT name, uuid, created_at, updated_at, deleted_at FROM user WHERE uuid="${req.params.uuid}"`, 
             (err, rs1) => {
                 if (err) throw err;
                 
