@@ -58,8 +58,16 @@ module.exports = {
         let uuid = Crypto.randomUUID();
         db.query(`INSERT INTO user (name, uuid) VALUES ('${req.params.name}', '${uuid}');`, (err, rs) => {
             if (err) throw err;
+
+            if (rs.affectedRows < 1) {
+                res.statusCode = 400;
+                console.error(`Failed to add user to database. username=${req.params.name}`);
+                res.send({error: "Failed to add new user to database."});
+                return;
+            }
+            res.statusCode = 200;
             console.log("New user added to database.");
-            res.send(uuid);
+            res.send({uuid});
         });
     },
         
