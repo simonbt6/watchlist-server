@@ -74,16 +74,16 @@ module.exports = [
             'handlers': WatchlistRoute.GetByUUID
         },
         {
-            'path': '/watchlist/:uuid/add',
-            'method': 'post',
-            'middlewares': [],
-            'handlers': WatchlistRoute.AddItem
-        },
-        {
             'path': '/watchlist/',
             'method': 'post',
             'middlewares': [],
             'handlers': WatchlistRoute.Create
+        },
+        {
+            'path': '/watchlist/:uuid/add',
+            'method': 'post',
+            'middlewares': [],
+            'handlers': WatchlistRoute.AddItem
         },
         {
             'path': '/watchlist/:uuid',
