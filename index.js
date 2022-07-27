@@ -20,6 +20,8 @@ app.use(morgan('dev'));
 app.use(express.json());
 app.use(cors());
 
+app.disable('etag');
+
 app.use((req, res, next) => {
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
