@@ -36,7 +36,7 @@ module.exports = [
         },
         {
             // Create new user.
-            'path': '/user/:name',
+            'path': '/user/',
             'method': 'post',
             'middlewares': [],
             'handlers': UserRoute.Create
@@ -77,7 +77,7 @@ module.exports = [
             'path': '/watchlist/:uuid/add',
             'method': 'post',
             'middlewares': [],
-            'handlers': WatchlistRoute.AddItem   // TODO
+            'handlers': WatchlistRoute.AddItem
         },
         {
             'path': '/watchlist/:uuid',
@@ -95,7 +95,7 @@ module.exports = [
             'path': '/watchlist/:uuid/:item',
             'method': 'delete',
             'middlewares': [],
-            'handlers': WatchlistRoute.Delete   // TODO
+            'handlers': WatchlistRoute.DeleteItem
         }
     ]
 ];
