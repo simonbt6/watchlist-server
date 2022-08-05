@@ -155,39 +155,35 @@ module.exports = {
             return;
         }
 
-        let result;
-
         // Duplicate verification
-        result = await db.query(`SELECT * FROM watchlist_item WHERE url='${req.body.url}' AND watchlist_id='${req.params.uuid}';`);
-        if (result.length > 0) {
-            res.statusCode = 400;
-            res.send({
-                error: {
-                    code: `DUPLICATE_ITEM_URL`,
-                    description: `Item URL already exists in watchlist.`
-                }
-            });
-            return;
-        }
+        db.query(`SELECT * FROM watchlist_item WHERE url='${req.body.url}' AND watchlist_id='${req.params.uuid}';`, (err, rs1) => {
+            if (rs1.length > 0) {
+                res.statusCode = 400;
+                res.send({
+                    error: {
+                        code: `DUPLICATE_ITEM_URL`,
+                        description: `Item URL already exists in watchlist.`
+                    }
+                });
+                return;
+            }
 
-
-        let uuid = Crypto.randomUUID();
-        
-        // Insert watchlist item data.
-        result = await db.query(`INSERT INTO watchlist_item (name, uuid, url, watchlist_id) VALUES ('${req.body.name}', '${uuid}', '${req.body.url}', '${req.params.uuid}')`)
-        if (result.affectedRows < 1) {
-            res.statusCode = 400;
-            res.send({
-                error: {
-                    code: err.code,
-                    description: `Failed to add item to watchlist.`
+            let uuid = Crypto.randomUUID();
+            db.query(`INSERT INTO watchlist_item (name, uuid, url, watchlist_id) VALUES ('${req.body.name}', '${uuid}', '${req.body.url}', '${req.params.uuid}')`, (err, rs2) => {
+                if (rs2.affectedRows < 1) {
+                    res.statusCode = 400;
+                    res.send({
+                        error: {
+                            code: err.code,
+                            description: `Failed to add item to watchlist.`
+                        }
+                    });
+                    console.error(`Failed to add item to watchlist.`);
+                    return;
                 }
-            });
-            console.error(`Failed to add item to watchlist.`);
-            return;
-        }
-            
-        res.send(uuid);
+            res.send(uuid);
+            }); 
+        });
     },
 
     /**
