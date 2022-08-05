@@ -21,10 +21,23 @@ let connect = () => {
 
 Connection.on('error', (err) => {
     console.error('DB ERROR', err);
-    if (err.code == 'PROTOCOL_CONNECTION_LOST') {
-        connect();
+    switch (err.code) {
+        case 'PROTOCOL_CONNECTION_LOST':
+            connect();
+        break;
+
+        case 'ECONNREFUSED':
+            throw err;
+        break;
+
+        case 'ER_ACCESS_DENIED_ERROR':
+            throw err;
+        break;
+
+        default:
+            throw err;
+        break;
     }
-    else throw err;
 });
 
 connect();
