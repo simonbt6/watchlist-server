@@ -155,11 +155,11 @@ module.exports = {
             return;
         }
 
-        let res;
+        let result;
 
         // Duplicate verification
-        res = await db.query(`SELECT * FROM watchlist_item WHERE url='${req.body.url}' AND watchlist_id='${req.params.uuid}';`);
-        if (res.length > 0) {
+        result = await db.query(`SELECT * FROM watchlist_item WHERE url='${req.body.url}' AND watchlist_id='${req.params.uuid}';`);
+        if (result.length > 0) {
             res.statusCode = 400;
             res.send({
                 error: {
@@ -174,8 +174,8 @@ module.exports = {
         let uuid = Crypto.randomUUID();
         
         // Insert watchlist item data.
-        res = await db.query(`INSERT INTO watchlist_item (name, uuid, url, watchlist_id) VALUES ('${req.body.name}', '${uuid}', '${req.body.url}', '${req.params.uuid}')`)
-        if (rs.affectedRows < 1) {
+        result = await db.query(`INSERT INTO watchlist_item (name, uuid, url, watchlist_id) VALUES ('${req.body.name}', '${uuid}', '${req.body.url}', '${req.params.uuid}')`)
+        if (result.affectedRows < 1) {
             res.statusCode = 400;
             res.send({
                 error: {
