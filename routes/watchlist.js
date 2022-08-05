@@ -156,7 +156,7 @@ module.exports = {
         }
 
         // Duplicate verification
-        db.query(`SELECT * FROM watchlist_item WHERE url='${req.body.url}' AND watchlist_id='${req.params.uuid}';`, (err, rs1) => {
+        db.query(`SELECT * FROM watchlist_item WHERE url='${req.body.url}' AND watchlist_id='${req.params.uuid}' AND deleted_at IS NULL;`, (err, rs1) => {
             if (rs1.length > 0) {
                 res.statusCode = 400;
                 res.send({
