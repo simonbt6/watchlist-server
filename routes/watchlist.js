@@ -130,7 +130,7 @@ module.exports = {
      * **Requires *name* and *url* json body.**
      * @params {*} uuid
      */
-     AddItem: (req, res) => {
+     AddItem: async (req, res) => {
         // Request Param Validation
         if (!req.body || !req.body.name || !req.body.url) {
             res.statusCode = 400;
@@ -154,25 +154,40 @@ module.exports = {
             });
             return;
         }
-        
-        let uuid = Crypto.randomUUID();
-        db.query(
-            `INSERT INTO watchlist_item (name, uuid, url, watchlist_id) VALUES ('${req.body.name}', '${uuid}', '${req.body.url}', '${req.params.uuid}')`, 
-            (err, rs) => {
-                if (rs.affectedRows < 1) {
-                    res.statusCode = 400;
-                    res.send({
-                        error: {
-                            code: err.code,
-                            description: `Failed to add item to watchlist.`
-                        }
-                    });
-                    console.error(`Failed to add item to watchlist.`);
-                    return;
+
+        let res;
+
+        // Duplicate verification
+        res = await db.query(`SELECT * FROM watchlist_item WHERE url='${req.body.url}' AND watchlist_id='${req.params.uuid}';`);
+        if (res.length > 0) {
+            res.statusCode = 400;
+            res.send({
+                error: {
+                    code: `DUPLICATE_ITEM_URL`,
+                    description: `Item URL already exists in watchlist.`
                 }
+            });
+            return;
+        }
+
+
+        let uuid = Crypto.randomUUID();
+        
+        // Insert watchlist item data.
+        res = await db.query(`INSERT INTO watchlist_item (name, uuid, url, watchlist_id) VALUES ('${req.body.name}', '${uuid}', '${req.body.url}', '${req.params.uuid}')`)
+        if (rs.affectedRows < 1) {
+            res.statusCode = 400;
+            res.send({
+                error: {
+                    code: err.code,
+                    description: `Failed to add item to watchlist.`
+                }
+            });
+            console.error(`Failed to add item to watchlist.`);
+            return;
+        }
             
-                res.send(uuid);
-        });
+        res.send(uuid);
     },
 
     /**
