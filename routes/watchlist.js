@@ -1,15 +1,24 @@
 const { now } = require('../util/time');
 const Crypto = require('crypto');
 const db = require('../util/database');
+const Verif = require('../util/verif');
+
 
 module.exports = {
-    GetAll: (req, res) => {
+    GetAll: async (req, res) => {
+        try {
+
+        }
+        catch (err){
+
+        }
+
         db.query(`SELECT * FROM watchlist WHERE deleted_at IS NULL;`, 
         (err, rs) => {
             if (err) throw err;
     
             if (rs.length < 1) {
-                res.send("No watchlist to display.");
+                res.send([]);
                 return;
             }
     
@@ -24,16 +33,20 @@ module.exports = {
         db.query(
             `SELECT name, uuid, owner_id, created_at, updated_at FROM watchlist WHERE uuid='${req.params.uuid}' AND deleted_at IS NULL;`, 
             (err, rs1) => {
-                if (err) throw err;
                 if (rs1.length < 1) {
-                    res.send("No watchlist to display.");
+                    res.statusCode = 400;
+                    res.send({
+                        error: {
+                            code: `NO_MATCH`,
+                            description: `Invalid watchlist uuid.`
+                        }
+                    });
                     return;
                 }
 
                 db.query(
                     `SELECT name, uuid, url, created_at, updated_at FROM watchlist_item WHERE watchlist_id='${req.params.uuid}' AND deleted_at IS NULL;`, 
                     (err, rs2) => {
-                        if (err) throw err;
 
                         res.send({watchlist: rs1[0], items: rs2});
                 });
@@ -50,11 +63,15 @@ module.exports = {
         db.query(
             `SELECT * FROM watchlist_item WHERE uuid='${req.params.item}' AND watchlist_id='${req.params.uuid}' WHERE deleted_at IS NULL;`, 
             (err, rs) => {
-                if (err) throw err;
 
                 if (rs.length < 1) {
                     res.statusCode = 400;
-                    res.send(`No watchlist item to display.`);
+                    res.send({
+                        error: {
+                            code: `NO_MATCH`,
+                            description: `No watchlist item to display.`
+                        }
+                    });
                     return;
                 }
 
@@ -69,27 +86,38 @@ module.exports = {
     Create: (req, res) => {
         if (!req.body || !req.body.name || !req.body.owner) {
             res.statusCode = 400;
-            res.send("Please provide a valid request body.");
+            res.send({
+                error: {
+                    code: `INVALID_REQUEST_BODY`,
+                    description: `Please provide a valid request body.`
+                }
+            });
             return;
         }
         let uuid = Crypto.randomUUID();
-        db.query(`SELECT id FROM user WHERE uuid='${req.body.owner}'`, (err, rs) => {
-            if (err) throw err;
-    
+        db.query(`SELECT id FROM user WHERE uuid='${req.body.owner}';`, (err, rs) => {
             if (rs.length < 1) {
                 res.statusCode = 400;
-                res.send("Invalid owner id.");
+                res.send({
+                    error: {
+                        code: `EMPTY_RESPONSE`,
+                        description: `Invalid owner id.`
+                    }
+                });
                 return;
             }
     
             db.query(
                 `INSERT INTO watchlist (name, uuid, owner_id) VALUES ('${req.body.name}', '${uuid}', '${req.body.owner}');`, 
-                (err, rs) => {
-                    if (err) throw err;
-        
+                (err, rs) => {        
                     if (rs.affectedRows < 1) {
                         res.statusCode = 400;
-                        res.send(`Failed to create watchlist.`);
+                        res.send({
+                            error: {
+                                code: err.code,
+                                description: `Failed to create watchlist.`
+                            }
+                        });
                         return;
                     }
         
@@ -103,8 +131,27 @@ module.exports = {
      * @params {*} uuid
      */
      AddItem: (req, res) => {
+        // Request Param Validation
         if (!req.body || !req.body.name || !req.body.url) {
-            res.send(`Invalid request body.`);
+            res.statusCode = 400;
+            res.send({
+                error: {
+                    code: `INVALID_REQUEST_BODY`,
+                    description: `Please provide a valid request body.`
+                }
+            });
+            return;
+        }
+
+        // URL Validation
+        if (!Verif.CheckURL(req.body.url)) {
+            res.statusCode = 400;
+            res.send({
+                error: {
+                    code: `INVALID_URL`,
+                    description: `Please provide a valid url.`
+                }
+            });
             return;
         }
         
@@ -112,9 +159,16 @@ module.exports = {
         db.query(
             `INSERT INTO watchlist_item (name, uuid, url, watchlist_id) VALUES ('${req.body.name}', '${uuid}', '${req.body.url}', '${req.params.uuid}')`, 
             (err, rs) => {
-                if (err) throw err;
                 if (rs.affectedRows < 1) {
-                    console.error(`Failed to add item to watchlist.`)
+                    res.statusCode = 400;
+                    res.send({
+                        error: {
+                            code: err.code,
+                            description: `Failed to add item to watchlist.`
+                        }
+                    });
+                    console.error(`Failed to add item to watchlist.`);
+                    return;
                 }
             
                 res.send(uuid);
@@ -122,19 +176,20 @@ module.exports = {
     },
 
     /**
-     * ``user_id`` header **required**
+     * ``user_id`` header **required**  
+     *   
+     * **Success**: 200  
+     * **Failed**: 400
      * @param {*} uuid 
      */
     Delete: (req, res) => {
         let deleted_at = now();
         db.query(
             `UPDATE watchlist SET deleted_at='${deleted_at}' WHERE uuid='${req.params.uuid}';`, 
-            (err, rs) => {
-                if (err) throw err;
-    
+            (err, rs) => {    
                 if (rs.affectedRows < 1) {
                     res.statusCode = 400;
-                    res.send(`Failed to remove watchlist ${req.params.uuid}.`);
+                    res.send({error: `Failed to remove watchlist ${req.params.uuid}.`});
                     return;
                 }
     
@@ -143,7 +198,8 @@ module.exports = {
     },
 
     /**
-     * 
+     * **Success**: 200  
+     * **Failed**: 400
      * @param {*} uuid 
      * @param {*} item 
      */
@@ -152,11 +208,15 @@ module.exports = {
         db.query(
             `UPDATE watchlist_item SET deleted_at='${deleted_at}' WHERE uuid='${req.params.item}' AND watchlist_id='${req.params.uuid}';`,
             (err, rs) => {
-                if (err) throw err;
 
                 if (rs.affectedRows < 1) {
                     res.status = 400;
-                    res.send(`Failed to remove watchlist item ${req.params.item} from ${req.params.uuid}.`);
+                    res.send({
+                        error: {
+                            code: `NO_MATCH`,
+                            description: `Failed to remove watchlist item ${req.params.item} from ${req.params.uuid}.`
+                        }
+                    });
                     return;
                 }
 
